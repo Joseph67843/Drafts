@@ -32,44 +32,69 @@
  * Joseph 02/04/2018
  */
 
-var pomoRunning = 'none', // none, pomodoro, break
-var buttonStartStopResume;
-
-/* We don't currently use these functions, but an alternative would be to measure the
-   time remaining when a Pomodoro starts, then compare that to the current time on stop
-   to see if a Pomodoro were completed or interruped.
-   
-function readTimer () {
-    return $('pomodoro .pomodoro-timer span').html();
-}
-
-function readPomodoroNumber (str) {
-	return parseInt(str.split("#")[1]);
-}
- */
- 
-function readFirstButton () {
-    return $("pomodoro .pomodoro-timer_buttons button").html()
-}
-
-function readTitle () {
-   return $('pomodoro .pomodoro-timer_title span').html();
-}
+var bptApp = {
 	
-function init () {
+    var pomoRunning = 'none'; // none, pomodoro, break
+    var buttonStartStopResume;
 
-    // add listener for messages
-    window.addEventListener("message", messageHandler, false);
+    /* We don't currently use these functions, but an alternative would be to measure the
+       time remaining when a Pomodoro starts, then compare that to the current time on stop
+       to see if a Pomodoro were completed or interruped.
+   
+    function readTimer () {
+        return $('pomodoro .pomodoro-timer span').html();
+    }
 
-    // add listeners for buttons
+    function readPomodoroNumber (str) {
+    	return parseInt(str.split("#")[1]);
+    }
+ 
+    function readFirstButton () {
+        return $("pomodoro .pomodoro-timer_buttons button").html()
+    }
+    */
+
+    function readTitle () {
+        return $('pomodoro .pomodoro-timer_title span').html();
+    }
+
+    function reward () {
+    <write this>
+    }
+
+    function punish () {
+    <write this>
+    }
+    
+    function init () {
+
+        // add listener for messages
+        window.addEventListener("message", bptApp.messageHandler, false);
+
+        // add listeners for buttons
 	var buttons = document.getElementsbyClassName ("pomodoro-timer_buttons");
 	buttonStartStopResume = buttons.firstElementChild;
+	bptApp.buttonStartStopResume.addEventListener("click", btpApp.firstButtonHandler, false);
 	
 	// We don't actually need to watch the second button at this time, since we're watching the messages
 	// If you add this, then declare the variable globally
 	// buttonStop = start.nextElementSibling; 
 	
-};
+    };
+
+    function exit () {
+	// If the window is closing in the middle of a pomodoro, then punish!
+	If (bptApp.isRunning = 'pomodoro") {
+	    bptApp.punish ();
+        }
+
+	// This serves no function other than to satisfy some obsessive trait I must have
+	bptApp.isRunning = 'none';
+	    
+	// remove our event listeners
+	window.removeEventListener("message");
+	btpApp.buttonStartStopResume.removeEventListener("click");
+    }
 
 function messageHandler (event) {
 
@@ -98,34 +123,36 @@ function messageHandler (event) {
 
             // Break started
             } else if (pomoTitle.indexOf ("BREAK") {
-				console.log ("Break started");
-				pomoRunning = 'break';
+		console.log ("Break started");
+		pomoRunning = 'break';
 
             // Unexpected title
             } else {
                 console.log (`Error - unexpected title: $pomoTitle`);
             } 
 
-			break;
+        break;
 		
-		// We're ignoring these, because they are redundant
-		case 'pododoro_timer_stopped':
+        // We're ignoring these, because they are redundant with 'pomodoro_timer_finished'
+        case 'pododoro_timer_stopped':
 		
-			break;
+	break;
 			
-		case 'pomodoro_timer_finished'
+	case 'pomodoro_timer_finished'
 		
-			// If we're in a pomodoro, then figure out whether to punish or reward
-			if 
-			break;
+	// If we're in a pomodoro, then figure out whether to punish or reward
+	if <here>
+	break;
 			
-		// If we're here, an unexpected message arrived
-		case default:
+	// If we're here, an unexpected message arrived
+	case default:
 		
-			console.log (`Error - unexpected message: $event.data.type`);
+	   console.log (`Error - unexpected message: $event.data.type`);
 			
-			break;
+	break;
     }
+
+<here>
 	
 //	console.log (event.data.type);
 //  console.log (" Time: " + readTimer() );
