@@ -59,11 +59,13 @@ var bptApp = {
     }
 
     function reward () {
-    <write this>
+    // <write this> 
+    console.log ('Good job - pomodoro finished!');
     }
 
     function punish () {
-    <write this>
+    // <write this>
+    console.log ('Oh no - pomodoro interrupted!');  
     }
     
     function init () {
@@ -84,7 +86,7 @@ var bptApp = {
 
     function exit () {
 	// If the window is closing in the middle of a pomodoro, then punish!
-	If (bptApp.isRunning = 'pomodoro") {
+	If (bptApp.isRunning === 'pomodoro") {
 	    bptApp.punish ();
         }
 
@@ -114,12 +116,12 @@ function messageHandler (event) {
         // Pomodoro or break started
         case 'pomodoro_timer_started': 
 
-			var pomoTitle = readTitle();
+			var pomoTitle = bptApp.readTitle();
       
             // Pomomodoro started
             if (pomoTitle.indexOf ("POMODORO") {
                 console.log ("Pomodoro started");
-                pomoRunning = 'pomodoro';
+                bptApp.isRunning === 'pomodoro';
 
             // Break started
             } else if (pomoTitle.indexOf ("BREAK") {
@@ -136,16 +138,25 @@ function messageHandler (event) {
         // We're ignoring these, because they are redundant with 'pomodoro_timer_finished'
         case 'pododoro_timer_stopped':
 		
-	break;
+       break;
 			
-	case 'pomodoro_timer_finished'
+       case 'pomodoro_timer_finished'
 		
-	// If we're in a pomodoro, then figure out whether to punish or reward
-	if <here>
-	break;
+       // If we were a pomodoro, then figure out whether to punish or reward
+       if bptApp.isRunning === 'pomodoro' {
+       // <here> punish or reward based on the title or the button
+       } 
+
+       // If we're not in a pomodoro, we don't care (although we could error check for none)
+
+       // Whether or not we're in a pomodoro, we're done and can switch to none.
+
+       bptApp.isRunning = 'none';
+
+       break;
 			
-	// If we're here, an unexpected message arrived
-	case default:
+       // If we're here, an unexpected message arrived
+       case default:
 		
 	   console.log (`Error - unexpected message: $event.data.type`);
 			
