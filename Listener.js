@@ -21,21 +21,29 @@
  * Since this reads the display to infer status where the messages
  * fall short, it's going to be finicky. If it starts misbehaving,
  * look at pomo-timer.com for interface changes.
+ * 
+ * Generally, we are going to listen for the pomodoro_timer_started
+ * message to learn when a pomo or break starts, and the 
+ * pomorodo_timer_finished message to learn when a pomodoro or break
+ * by completion or the user terminating. We will add a listener
+ * to the first button to watch for when the user pauses a 
+ * pomodoro or break.
  *
  * Currently, when the user stops a pomodoro without completing,
  * the title remains "POMODORO #N", while when a pomodoro is 
- * is completed, it changes to "TAKE A SHORT BREAK." When a 
- * 'pomodoro-time_finished' message is received while a pomodoro 
- * is running, we will use the title to infer whether the pomo
- * was completed or interrupted.
+ * is completed, it changes to "TAKE A SHORT BREAK." We will use the
+ * title and the isRunning variable to figure out whether the events 
+ * are associated with breaks, pomos, completions and interuptions. 
+ * An alternative would be to read the timer when a pomo starts and 
+ * measure elapsed time when it stops.
  *
  * Joseph 02/04/2018
  */
 
 var bptApp = {
 	
-    var pomoRunning = 'none'; // none, pomodoro, break
-    var buttonStartStopResume;
+    var isRunning = 'none'; // none, pomodoro, break
+    var buttonStartStopResume; // we'll need a pointer to this button so we can add and remove a listener
 
     /* We don't currently use these functions, but an alternative would be to measure the
        time remaining when a Pomodoro starts, then compare that to the current time on stop
@@ -54,29 +62,32 @@ var bptApp = {
     }
     */
 
-    function readTitle () {
+    readTitle: function () {
         return $('pomodoro .pomodoro-timer_title span').html();
     }
 
-    function reward () {
-    // <write this> 
-    console.log ('Good job - pomodoro finished!');
+    pomoDone: function (num) {
+        // browser.sendMessage({
+        //    type: "pomTracker.pomodoro.done",
+        //    pomodoroCount: num
+        // });
+        console.log ('Good job - pomodoro finished!');
     }
 
-    function punish () {
-    // <write this>
-    console.log ('Oh no - pomodoro interrupted!');  
+    pomoStopped: function  () {
+        //  browser.sendMessage({type: "pomTracker.pomodoro.stopped"});
+        console.log ('Oh no - pomodoro interrupted!');  
     }
     
-    function init () {
+    init: function () {
 
         // add listener for messages
-        window.addEventListener("message", bptApp.messageHandler, false);
+        window.addEventListener("message", this.messageHandler, false);
 
         // add listeners for buttons
 	var buttons = document.getElementsbyClassName ("pomodoro-timer_buttons");
-	buttonStartStopResume = buttons.firstElementChild;
-	bptApp.buttonStartStopResume.addEventListener("click", btpApp.firstButtonHandler, false);
+	this.buttonStartStopResume = buttons.firstElementChild;
+	this.buttonStartStopResume.addEventListener("click", this.firstButtonHandler, false);
 	
 	// We don't actually need to watch the second button at this time, since we're watching the messages
 	// If you add this, then declare the variable globally
@@ -84,66 +95,73 @@ var bptApp = {
 	
     };
 
-    function exit () {
+    exit: function () {
 	// If the window is closing in the middle of a pomodoro, then punish!
-	If (bptApp.isRunning === 'pomodoro") {
-	    bptApp.punish ();
+	If (this.isRunning === 'pomodoro") {
+	    this.pomoDone ();
         }
 
 	// This serves no function other than to satisfy some obsessive trait I must have
-	bptApp.isRunning = 'none';
+	this.isRunning = 'none';
 	    
 	// remove our event listeners
 	window.removeEventListener("message");
-	btpApp.buttonStartStopResume.removeEventListener("click");
+	this.buttonStartStopResume.removeEventListener("click");
     }
 
-function messageHandler (event) {
+    messageHandler: function (event) {
 
-    // We only accept messages from ourselves
-    if (event.source != window)
-     		return;
+        // We only accept messages from ourselves
+        if (event.source != window)
+            return;
 
-    // We can ignore empty events
-    if (!event.data.type) {
-     		return;
-    }
+        // We can ignore empty events
+        if (!event.data.type) {
+     	    return;
+        }
 
-    // For all other messages, do the right thing
+        // For all other messages, do the right thing
 
-    switch (event.data.type) {
-
-        // Pomodoro or break started
-        case 'pomodoro_timer_started': 
-
-			var pomoTitle = bptApp.readTitle();
-      
-            // Pomomodoro started
-            if (pomoTitle.indexOf ("POMODORO") {
-                console.log ("Pomodoro started");
-                bptApp.isRunning === 'pomodoro';
-
-            // Break started
-            } else if (pomoTitle.indexOf ("BREAK") {
-		console.log ("Break started");
-		pomoRunning = 'break';
-
-            // Unexpected title
-            } else {
-                console.log (`Error - unexpected title: $pomoTitle`);
-            } 
-
-        break;
-		
-        // We're ignoring these, because they are redundant with 'pomodoro_timer_finished'
-        case 'pododoro_timer_stopped':
-		
-       break;
+        switch (event.data.type) {
 			
-       case 'pomodoro_timer_finished'
+            case 'pomodoro_timer_started': 
+	        // Ok, we have either started a pomo or a break
+
+	        var pomoTitle = this.readTitle();
+      
+                if (pomoTitle.indexOf ("POMODORO") { 
+		    //We have started a pomo
+		    
+                    console.log ("Pomodoro started");
+                    this.isRunning === 'pomodoro';
+
+           
+                } else if (pomoTitle.indexOf ("BREAK") {
+	 	    // We have started a break
 		
-       // If we were a pomodoro, then figure out whether to punish or reward
-       if bptApp.isRunning === 'pomodoro' {
+	            console.log ("Break started");
+		    this.isRunning = 'break';
+
+                } else {
+		    // If the title didn't contain either "POMODORO" or "BREAK", something is wrong
+                    console.log (`Error - unexpected title: $pomoTitle`);
+                } 
+
+            break;
+            case 'pomodoro_timer_started': 
+
+            case 'pododoro_timer_stopped':
+            // We can ignore these messages because they are redundant with pomodoro_timer_finished
+		
+            break;
+			
+            case 'pomodoro_timer_finished'
+            // We have either (a) finished or (b) quit a (i) pomodoro or (ii) break
+		
+            if this.isRunning === 'pomodoro' {
+                // We were in a pomodoro - if finished, reward, if quit, punish
+
+// <Use the pomocount to figure this out??> 
        // <here> punish or reward based on the title or the button
        } 
 
@@ -163,6 +181,10 @@ function messageHandler (event) {
 	break;
     }
 
+            case 'pododoro_timer_stopped':
+            // We can ignore these messages because they are redundant with pomodoro_timer_finished
+		
+            break;
 <here>
 	
 //	console.log (event.data.type);
